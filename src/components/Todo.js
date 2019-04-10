@@ -10,7 +10,7 @@ const todo=(props)=>{
 
     return (
         <React.Fragment>
-            <input type="text" placeholder="Todo" onChange={inputChangeHandler} value={inputState[0]}/>
+            <input type="text" placeholder="Todo" onChange={inputChangeHandler} value={todoName}/>
             <button type="button">Add</button>
 
             <ul></ul>
