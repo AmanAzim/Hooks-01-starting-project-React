@@ -20,7 +20,7 @@ const todo=(props)=>{
         });
 
         return ()=>{console.log('cleanUp')} // this return statement gives the effect of "componentWillUnmount()"
-    }, []);
+    }, []);// if we don't give have input field here as "üseEffect(()=>{})" then it will run after each update and if we have an empty array [] it will only run at mounting and before unmounting of the component
 
     useEffect(()=>{
         document.addEventListener('mousemove', mouseMoveHandler);
@@ -30,8 +30,10 @@ const todo=(props)=>{
         }
     }, []);
     const mouseMoveHandler=(event)=>{
-       // console.log(event.clientX, event.clientY);
+        console.log(event.clientX, event.clientY);
     };
+
+
 
     const inputChangeHandler=(event)=>{
             //inputState[1](event.target.value);
