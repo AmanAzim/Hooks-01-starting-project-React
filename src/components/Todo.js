@@ -1,11 +1,13 @@
-import React, {useState, useEffect, useReducer, useRef} from 'react';
+import React, {useState, useEffect, useReducer, useRef, useMemo} from 'react';
 import axios from 'axios'
+import List from './list'
 
 const todo=(props)=>{
     //const inputState=useState(''); //the "useState" returns a array that have two things 1st the initial value of the state (variable) and 2nd the function to set the value of that state (variable)
     const [todoName, setTodoName]=useState('');
     const [todoList, setTodoList]=useState([]);
     const [todoState, setTodoState]=useState({userInput:'', todoList2:[]}); //using a single useState to make full todo list
+    const [inputIsValid, setInputIsValid]=useState(false);
 
     const todoListReducer=(state, action)=>{
         switch (action.type) {
@@ -120,20 +122,50 @@ const todo=(props)=>{
 
 
 
-    const todoInputRef=useRef();
+    const todoInputRef=useRef();// make the todoInputRef a reference receiver
 
+    const todoAddHandler4=()=>{
+
+        const todoName4=todoInputRef.current.value; //from this refrence we get the value of the input item where "todoInputRef" is placed. We dont need to save it into another state like "useState()" "todoName" we can just directly add the value to the "todoList3"
+
+        axios.post('https://test-react-hook-d07b5.firebaseio.com/todos.json', {name: todoName4})
+            .then(res=>{
+
+                setTimeout(()=>{
+                    let todoItem={id:res.data.name, name:todoName4};
+                    dispatch({type:'ADD', payload:todoItem})
+
+                }, 3000)
+
+            }).catch(err=>console.log(err))
+    };
+    const todoRemoveHandler4=(todoId)=>{
+        axios.delete('https://test-react-hook-d07b5.firebaseio.com/todos/'+todoId+'.json')
+            .then(res=>{
+
+                dispatch({type:'REMOVE', payload:todoId});
+
+            }).catch(err=>console.log(err));
+
+    };
+    const inputValidationHandler =(event)=>{
+        if(event.target.value.trim()===''){
+            setInputIsValid(false);
+        }else{
+            setInputIsValid(true);
+        }
+    }
 
 
     return (
         <React.Fragment>
             <input type="text" placeholder="Todo" onChange={inputChangeHandler} value={todoName}/>
-            <input type="text" placeholder="Todo" ref={todoInputRef}/>
             <button type="button" onClick={todoAddHandler}>Add</button>
 
             <ul>
                 {todoList.map(todo=>{ return <li key={todo.id}>{todo.name}</li>})}
             </ul>
-
+            <hr></hr>
 
 
             <input type="text" placeholder="Using combined useState" onChange={inputChangeHandler2} value={todoState.userInput}/>
@@ -142,7 +174,7 @@ const todo=(props)=>{
             <ul>
                 {todoState.todoList2.map(todo=>{ return <li key={todo}>{todo}</li>})}
             </ul>
-
+            <hr></hr>
 
 
             <input type="text" placeholder="Using useReducer" onChange={inputChangeHandler_Reducer} value={todoName}/>
@@ -151,6 +183,21 @@ const todo=(props)=>{
             <ul>
                 {todoList3.map(todo=>{ return <li style={{cursor:'pointer'}} key={todo.id} onClick={()=>todoRemoveHandler(todo.id)}>{todo.name}</li>})}
             </ul>
+            <hr></hr>
+
+
+            <input type="text" placeholder="Using useRef" ref={todoInputRef} onChange={inputValidationHandler} style={{backgroundColor: inputIsValid? 'transparent':'red'}}/>
+            <button type="button" onClick={todoAddHandler4}>Add</button>
+
+            {/*
+            <ul>
+                {todoList3.map(todo=>{ return <li key={todo.id} onClick={()=>todoRemoveHandler4(todo.id)}>{todo.name}</li>})}
+            </ul>
+            */}
+
+            {useMemo(()=>(<List items={todoList3} onClick={todoRemoveHandler4}/>),[todoList3])} {/* useMemo() to avoid unnecessary rerendering. it will only rerender when "todoList3" changes */}
+
+
         </React.Fragment>
     );
 };
