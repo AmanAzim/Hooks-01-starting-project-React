@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useReducer, useRef, useMemo} from 'react';
 import axios from 'axios'
 import List from './list'
+import {useFormInput} from '../hooks/forms'
 
 const todo=(props)=>{
     //const inputState=useState(''); //the "useState" returns a array that have two things 1st the initial value of the state (variable) and 2nd the function to set the value of that state (variable)
@@ -8,6 +9,7 @@ const todo=(props)=>{
     const [todoList, setTodoList]=useState([]);
     const [todoState, setTodoState]=useState({userInput:'', todoList2:[]}); //using a single useState to make full todo list
     const [inputIsValid, setInputIsValid]=useState(false);
+    const todoInput=useFormInput();//custom Hook
 
     const todoListReducer=(state, action)=>{
         switch (action.type) {
@@ -154,7 +156,32 @@ const todo=(props)=>{
         }else{
             setInputIsValid(true);
         }
-    }
+    };
+
+
+
+    const todoAddHandler_customHook=()=>{
+
+        const todoName5=todoInput.value; //
+
+        axios.post('https://test-react-hook-d07b5.firebaseio.com/todos.json', {name: todoName5})
+            .then(res=>{
+
+                    let todoItem={id:res.data.name, name:todoName5};
+                    dispatch({type:'ADD', payload:todoItem})
+
+            }).catch(err=>console.log(err))
+    };
+    const todoRemoveHandler_customHook=(todoId)=>{
+        axios.delete('https://test-react-hook-d07b5.firebaseio.com/todos/'+todoId+'.json')
+            .then(res=>{
+
+                dispatch({type:'REMOVE', payload:todoId});
+
+            }).catch(err=>console.log(err));
+
+    };
+
 
 
     return (
@@ -197,6 +224,17 @@ const todo=(props)=>{
 
             {useMemo(()=>(<List items={todoList3} onClick={todoRemoveHandler4}/>),[todoList3])} {/* useMemo() to avoid unnecessary rerendering. it will only rerender when "todoList3" changes */}
 
+            <hr></hr>
+
+
+            <input type="text"
+                   placeholder="Using custom Hook"
+                   onChange={todoInput.onChange}
+                   value={todoInput.value}
+                   style={{backgroundColor: todoInput.validity? 'transparent':'red'}}/>
+            <button type="button" onClick={todoAddHandler_customHook}>Add</button>
+
+            {useMemo(()=>(<List items={todoList3} onClick={todoRemoveHandler_customHook}/>),[todoList3])} {/* useMemo() to avoid unnecessary rerendering. it will only rerender when "todoList3" changes */}
 
         </React.Fragment>
     );
